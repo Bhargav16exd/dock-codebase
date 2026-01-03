@@ -1,0 +1,8 @@
+{
+  "product_id": "prod_123456",
+  "dock_license_key_one": "DLK-ONE-ABCDEF-123456",
+  "dock_license_key_two": "DLK-TWO-UVWXYZ-789012",
+  "is_dock_active": true,
+  "activation_api": "https://api.example.com/activate",
+  "mac_id": "00:1A:2B:3C:4D:5E"
+}

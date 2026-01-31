@@ -1,12 +1,21 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"net"
+	"os"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/Bhargav16exd/dock-codebase.git/internal"
 )
+
+type Auth struct {
+	Token string `json:"token"`
+}
 
 func main() {
 
@@ -55,6 +64,82 @@ func startApp(label *widget.Label) {
 		internal.ActivateDock()
 		internal.GenerateCryptoKeys()
 	}
+
+	// Connect to the server
+	conn, err := net.Dial("tcp", "localhost:9090")
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	defer conn.Close()
+
+	AuthData := internal.Frame{
+		ProductId:        internal.GetConfig().ProductId,
+		Token:            "token",
+		FrameMessageType: internal.MessageTypeAuth.String(),
+	}
+
+	authBytes, err := json.Marshal(AuthData)
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	//send auth request
+	conn.Write(authBytes)
+
+	for {
+
+		fmt.Println("hi")
+
+		var frame internal.Frame
+		err := json.NewDecoder(conn).Decode(&frame)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if frame.FrameMessageType == internal.MessageTypeFileMetaData.String() {
+			err := json.NewEncoder(conn).Encode(internal.Frame{
+				FrameMessageType: internal.MessageTypeAck.String(),
+			})
+			fmt.Println(err)
+		}
+
+		fmt.Println(frame.FileMetaData.FileName)
+
+		if frame.FrameMessageType == internal.MessageTypeFile.String() {
+
+			fmt.Println(frame.FileMetaData.FileName)
+
+			f, err := os.OpenFile(
+				"./backups/"+frame.FileMetaData.FileName,
+				os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+				0777,
+			)
+
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			defer f.Close()
+
+			_, err = f.Write(frame.Payload)
+
+		}
+
+		fmt.Println("someerr")
+	}
+	// 	//get file info from connection
+	// 	//if file exists
+	// 	//write file on client
+	// 	// on success return ack
+	// 	// on fail return fail
+
+	// 	//if no file exists , wait and restart again after some time
 
 	//TBD
 }

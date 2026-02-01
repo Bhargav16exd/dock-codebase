@@ -5,6 +5,7 @@ type MessageType int
 const (
 	MessageTypeAuth MessageType = iota
 	MessageTypeFile
+	MessageTypeRequestFile
 	MessageTypeFileMetaData
 	MessageTypeAck
 	MessageTypeFileEnd
@@ -13,6 +14,7 @@ const (
 var MessageTypeValue = map[MessageType]string{
 	MessageTypeAuth:         "MessageTypeAuth",
 	MessageTypeFile:         "MessageTypeFile",
+	MessageTypeRequestFile:  "MessageTypeRequestFile",
 	MessageTypeFileMetaData: "MessageTypeFileMetaData",
 	MessageTypeAck:          "MessageTypeAck",
 	MessageTypeFileEnd:      "MessageTypeFileEnd",

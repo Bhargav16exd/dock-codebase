@@ -1,21 +1,12 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"net"
-	"os"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/Bhargav16exd/dock-codebase.git/internal"
 )
-
-type Auth struct {
-	Token string `json:"token"`
-}
 
 func main() {
 
@@ -65,74 +56,52 @@ func startApp(label *widget.Label) {
 		internal.GenerateCryptoKeys()
 	}
 
-	// Connect to the server
-	conn, err := net.Dial("tcp", "localhost:9090")
+	//function will repeated look for files
+	go internal.CheckForDataFromServer()
+	go internal.CheckForFilesAvailable()
 
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
+	// for {
 
-	defer conn.Close()
+	// 	fmt.Println("hi")
 
-	AuthData := internal.Frame{
-		ProductId:        internal.GetConfig().ProductId,
-		Token:            "token",
-		FrameMessageType: internal.MessageTypeAuth.String(),
-	}
+	// 	var frame internal.Frame
+	// 	err := json.NewDecoder(conn).Decode(&frame)
 
-	authBytes, err := json.Marshal(AuthData)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 	}
 
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
+	// 	if frame.FrameMessageType == internal.MessageTypeFileMetaData.String() {
+	// 		err := json.NewEncoder(conn).Encode(internal.Frame{
+	// 			FrameMessageType: internal.MessageTypeAck.String(),
+	// 		})
+	// 		fmt.Println(err)
+	// 	}
 
-	//send auth request
-	conn.Write(authBytes)
+	// 	fmt.Println(frame.FileMetaData.FileName)
 
-	for {
+	// 	if frame.FrameMessageType == internal.MessageTypeFile.String() {
 
-		fmt.Println("hi")
+	// 		fmt.Println(frame.FileMetaData.FileName)
 
-		var frame internal.Frame
-		err := json.NewDecoder(conn).Decode(&frame)
+	// 		f, err := os.OpenFile(
+	// 			"./backups/"+frame.FileMetaData.FileName,
+	// 			os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+	// 			0777,
+	// 		)
 
-		if err != nil {
-			fmt.Println(err)
-		}
+	// 		if err != nil {
+	// 			fmt.Println(err)
+	// 			return
+	// 		}
+	// 		defer f.Close()
 
-		if frame.FrameMessageType == internal.MessageTypeFileMetaData.String() {
-			err := json.NewEncoder(conn).Encode(internal.Frame{
-				FrameMessageType: internal.MessageTypeAck.String(),
-			})
-			fmt.Println(err)
-		}
+	// 		_, err = f.Write(frame.Payload)
 
-		fmt.Println(frame.FileMetaData.FileName)
+	// 	}
 
-		if frame.FrameMessageType == internal.MessageTypeFile.String() {
-
-			fmt.Println(frame.FileMetaData.FileName)
-
-			f, err := os.OpenFile(
-				"./backups/"+frame.FileMetaData.FileName,
-				os.O_CREATE|os.O_WRONLY|os.O_APPEND,
-				0777,
-			)
-
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer f.Close()
-
-			_, err = f.Write(frame.Payload)
-
-		}
-
-		fmt.Println("someerr")
-	}
+	// 	fmt.Println("someerr")
+	// }
 	// 	//get file info from connection
 	// 	//if file exists
 	// 	//write file on client

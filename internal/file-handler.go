@@ -57,18 +57,30 @@ func CheckForDataFromServer() {
 func CheckForFilesAvailable() {
 	for {
 
-		if len(fileNames) > 0 {
-			for index, value := range fileNames {
-				fetchAndWriteFile(index, value)
-			}
-
-		} else {
-			time.Sleep(time.Minute * 1)
+		file := popFile()
+		if file == "" {
+			time.Sleep(time.Second * 5)
+			continue
 		}
+
+		fetchAndWriteFile(file)
 	}
 }
 
-func fetchAndWriteFile(index int, fileName string) {
+func popFile() string {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if len(fileNames) == 0 {
+		return ""
+	}
+
+	file := fileNames[0]
+	fileNames = fileNames[1:]
+	return file
+}
+
+func fetchAndWriteFile(fileName string) {
 
 	// Connect to the server
 	conn, err := net.Dial("tcp", "localhost:9090")
@@ -119,8 +131,6 @@ func fetchAndWriteFile(index int, fileName string) {
 
 	if resp.FrameMessageType == MessageTypeFile.String() {
 
-		fmt.Println(resp.FileMetaData.FileName)
-
 		f, err := os.OpenFile(
 			"./backups/"+resp.FileMetaData.FileName,
 			os.O_CREATE|os.O_WRONLY|os.O_APPEND,
@@ -138,13 +148,5 @@ func fetchAndWriteFile(index int, fileName string) {
 		if err != nil {
 			fmt.Println(err)
 		}
-
-		removeElement(index)
 	}
-}
-
-func removeElement(index int) {
-	mu.Lock()
-	fileNames = append(fileNames[:index], fileNames[index+1:]...)
-	mu.Unlock()
 }

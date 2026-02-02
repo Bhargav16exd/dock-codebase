@@ -47,7 +47,7 @@ func ActivateDock() {
 
 	bufferedPayload := bytes.NewBuffer(encodedPayload)
 
-	encodedRes, err := http.Post(configs.ActivationApi, APPLICATION_JSON, bufferedPayload)
+	encodedRes, err := http.Post(configs.ServerHost+configs.ApiActivationPath, APPLICATION_JSON, bufferedPayload)
 
 	if err != nil {
 		fmt.Println(err)

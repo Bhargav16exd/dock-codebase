@@ -3,6 +3,9 @@
   "dock_license_key_one": "DLK-ONE-ABCDEF-123456",
   "dock_license_key_two": "DLK-TWO-UVWXYZ-789012",
   "is_dock_active": true,
-  "activation_api": "https://api.example.com/activate",
+  "server_host":"https://api.example.com/api",
+	"api_activation_path": "/dock/activate",
+	"api_file_check_path": "/files/check",
+	"api_download_file_path": "/files/download",
   "mac_id": "00:1A:2B:3C:4D:5E"
 }

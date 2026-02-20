@@ -11,7 +11,7 @@ pipeline {
     stage('Build') {
       steps {
         sh '''
-        export CGO_ENABLED=0
+        export CGO_ENABLED=1
         export GOOS=linux
         export GOARCH=arm64
         go build -o dock

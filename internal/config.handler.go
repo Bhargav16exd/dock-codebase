@@ -15,7 +15,9 @@ type ConfigType struct {
 	ApiActivationPath   string `json:"api_activation_path"`
 	ApiFileCheckPath    string `json:"api_file_check_path"`
 	ApiDownloadFilePath string `json:"api_download_file_path"`
+	ApiDeleteFilePath   string `json:"api_delete_file_path"`
 	MacId               string `json:"mac_id"`
+	Environment         string `json:"environment"`
 }
 
 func GetConfig() ConfigType {

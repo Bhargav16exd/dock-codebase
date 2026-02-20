@@ -28,12 +28,14 @@ var (
 )
 
 func FetchConfig() ConfigType {
-
 	once.Do(func() {
 		config = GetConfig()
 	})
 	return config
 }
+
+const PRODUCTION string = "PRODUCTION"
+const DEV string = "DEV"
 
 func CheckForDataFromServer() {
 
@@ -68,13 +70,12 @@ func CheckForDataFromServer() {
 
 func CheckForFilesAvailable() {
 	for {
-
 		file := popFile()
 		if file == "" {
 			time.Sleep(time.Second * 5)
 			continue
 		}
-
+		fmt.Println("here 3")
 		go fetchAndWriteFile(file)
 	}
 }
@@ -94,12 +95,11 @@ func popFile() string {
 
 func fetchAndWriteFile(fileName string) {
 
-	resp, err := http.Get(FetchConfig().ServerHost + FetchConfig().ApiDownloadFilePath + "?file=" + fileName)
+	resp, err := http.Get(FetchConfig().ServerHost + FetchConfig().ApiDownloadFilePath + fileName)
 
 	if err != nil {
 		fmt.Println(err)
 	}
-
 	defer resp.Body.Close()
 
 	file, err := os.Create("./backups/" + fileName)
@@ -110,7 +110,25 @@ func fetchAndWriteFile(fileName string) {
 
 	defer file.Close()
 
-	io.Copy(file, resp.Body)
+	_, err = io.Copy(file, resp.Body)
 
-	// TBD - delete file API call to server
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if GetConfig().Environment == PRODUCTION {
+		go DeleteFileFromServer(fileName)
+	}
+}
+
+func DeleteFileFromServer(filename string) {
+
+	req, err := http.NewRequest(http.MethodDelete, FetchConfig().ServerHost+FetchConfig().ApiDeleteFilePath+filename, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	fmt.Println(resp)
 }

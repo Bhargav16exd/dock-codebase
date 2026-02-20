@@ -5,7 +5,9 @@
   "is_dock_active": true,
   "server_host":"https://api.example.com/api",
 	"api_activation_path": "/dock/activate",
-	"api_file_check_path": "/files/check",
-	"api_download_file_path": "/files/download",
-  "mac_id": "00:1A:2B:3C:4D:5E"
+	"api_file_check_path": "/dock/check",
+	"api_download_file_path": "/dock/download/",
+  "api_delete_file_path": "/dock/delete/",
+  "mac_id": "00:1A:2B:3C:4D:5E",
+  "environment":"prod"
 }

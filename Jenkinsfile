@@ -10,7 +10,10 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'go build -o dock'
+        sh '''
+        export CGO_ENABLED=1
+        go build -o dock
+        '''
       }
     }
 

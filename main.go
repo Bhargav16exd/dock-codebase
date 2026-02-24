@@ -50,6 +50,13 @@ func startApp(label *widget.Label) {
 		update("No Internet found")
 	}
 
+	for {
+		if internal.CheckIsControlPlaneServerReachable() {
+			break
+		}
+		time.Sleep(time.Minute)
+	}
+
 	//get configs
 	configs := internal.GetConfig()
 

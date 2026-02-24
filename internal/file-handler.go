@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -38,14 +39,17 @@ const PRODUCTION string = "PRODUCTION"
 const DEV string = "DEV"
 
 func CheckForDataFromServer() {
-
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	for {
-
 		// TBD - send token with Request
-		resp, err := http.Get(FetchConfig().ServerHost + FetchConfig().ApiFileCheckPath)
+		resp, err := client.Get(FetchConfig().ServerHost + FetchConfig().ApiFileCheckPath)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println("Server Unreachable")
+			time.Sleep(time.Minute)
+			continue
 		}
 
 		info, err := io.ReadAll(resp.Body)
